@@ -128,9 +128,9 @@ app.use('*', (req, res) => {
     });
 });
 
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
-    console.log(
-        `Server running in ${process.env.NODE_ENV} mode on port ${PORT} http://localhost:${PORT}`
-    );
+const hostname = '127.0.0.1'; // or use '0.0.0.0' to allow external access
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, hostname, () => {
+    console.log(`Server running on http://${hostname}:${PORT}/`);
 });
