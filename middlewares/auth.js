@@ -8,8 +8,13 @@ const protect = async (req, res, next) => {
     if (req.headers.authorization?.startsWith('Bearer')) {
         token = req.headers.authorization.split(' ')[1];
     } else if (req.cookies?.accessToken) {
-        token = req.cookies.accessToken;
+        token = req.cookies.accessToken || null;    
     }
+    console.log("All Request Headers:", req.headers);
+    console.log("Cookies received:", req.cookies);
+    console.log("Authorization Header:", req.headers.authorization);
+    console.log("Extracted Token:", token);
+
 
     if (!token) {
         return handleError(res, 401, 'Not authenticated');

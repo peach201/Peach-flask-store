@@ -20,8 +20,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+
+// If you’re behind a reverse proxy (e.g. AWS ELB), trust the first proxy
 app.set('trust proxy', 1);
-app.use(express.urlencoded({ extended: true })); // Needed to parse form-encoded data
 
 // Connect to MongoDB
 connectDB();
@@ -30,13 +31,54 @@ connectDB();
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(cors({
-    origin: process.env.CLIENT_URL,
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE']
-}));
 
-// Serve static files
+const allowedOrigins = [
+    "https://main.d3si3a5vmaup5e.amplifyapp.com",
+    "https://peachflask.com",
+    "https://www.peachflask.com",
+    "http://localhost:3000",
+];
+
+app.use(
+    cors({
+        origin: (origin, callback) => {
+            // Allow requests with no origin (like mobile apps or curl requests)
+            if (!origin) return callback(null, true);
+            if (allowedOrigins.includes(origin)) {
+                callback(null, true);
+            } else {
+                callback(new Error(`CORS: Origin ${origin} not allowed`));
+            }
+        },
+        credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+        exposedHeaders: ['Set-Cookie'],
+    })
+);
+
+
+
+
+// Example route to set a cookie
+app.get('/set-cookie', (req, res) => {
+    res.cookie('exampleCookie', 'cookieValue', {
+        httpOnly: true,
+        secure: true, // Ensure this is true for HTTPS
+        sameSite: 'None', // Ensure this is 'None' for cross-origin requests
+    });
+    res.send('Cookie set');
+});
+
+
+app.get('/', (req, res) => {
+    res.send('CORS is configured correctly.');
+});
+
+
+
+
+// Serve static files (images, etc.)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
@@ -56,7 +98,7 @@ app.get('/api/health', (req, res) => {
         success: true,
         message: 'Server is running',
         timestamp: new Date(),
-        uptime: process.uptime()
+        uptime: process.uptime(),
     });
 });
 
@@ -66,7 +108,7 @@ app.get('/api/test-email', async (req, res) => {
             from: process.env.EMAIL_FROM,
             to: 'test@example.com',
             subject: 'Test Email',
-            text: 'This is a working test email'
+            text: 'This is a working test email',
         });
         res.send('✅ Test email sent successfully');
     } catch (error) {
@@ -75,9 +117,6 @@ app.get('/api/test-email', async (req, res) => {
     }
 });
 
-
-
-
 // Error Handling Middleware
 app.use(errorHandler);
 
@@ -85,16 +124,13 @@ app.use(errorHandler);
 app.use('*', (req, res) => {
     res.status(404).json({
         success: false,
-        message: 'Endpoint not found'
+        message: 'Endpoint not found',
     });
 });
 
-
-
-
-const PORT = process.env.PORT || 8080   ;
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-    console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT} http://localhost:${PORT}`);
+    console.log(
+        `Server running in ${process.env.NODE_ENV} mode on port ${PORT} http://localhost:${PORT}`
+    );
 });
-
-

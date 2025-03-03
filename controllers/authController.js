@@ -17,11 +17,13 @@ import {
 
 // Helper: Set authentication cookies
 const setAuthCookies = (res, accessToken, refreshToken) => {
+
     const cookieOptions = {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict'
+        secure: true,   // Must be true for HTTPS
+        sameSite: "None" // Required for cross-site cookies in HTTPS
     };
+
 
     res.cookie('accessToken', accessToken, {
         ...cookieOptions,
@@ -30,9 +32,12 @@ const setAuthCookies = (res, accessToken, refreshToken) => {
 
     res.cookie('refreshToken', refreshToken, {
         ...cookieOptions,
-        maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+        maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days     
     });
+    console.log("Set-Cookie Header:", res.getHeaders()["set-cookie"]);
+
 };
+
 
 // @desc    Register new user
 // @route   POST /api/auth/signup
@@ -134,6 +139,8 @@ export const verifyEmail = async (req, res) => {
 // @access  Public
 // Login Controller
 export const login = async (req, res) => {
+    
+    
     try {
         const { email, password } = req.body;
 

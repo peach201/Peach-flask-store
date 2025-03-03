@@ -8,9 +8,10 @@ import { handleResponse, handleError } from '../utils/responseHandler.js';
 // @access  Private
 export const createReview = async (req, res) => {
     try {
-      
+        console.log("Request Body:", req.body);
         const { productId, orderId, rating, comment } = req.body;
         const userId = req.user._id
+        
 
         // Validate input
         const missingFields = [];
@@ -29,6 +30,7 @@ export const createReview = async (req, res) => {
             status: 'Delivered',
             'items.product': productId
         }).lean();
+        console.log("Order:", order);
 
         if (!order) {
             return handleError(res, 403,

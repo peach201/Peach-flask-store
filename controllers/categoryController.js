@@ -2,6 +2,7 @@ import Category from '../models/category.js';
 
 // CREATE a new category (Admin only)
 export const createCategory = async (req, res) => {
+    console.log(req.body);
     try {
         const { name, description, isActive } = req.body;
         const category = new Category({ name, description, isActive });
