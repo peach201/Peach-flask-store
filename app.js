@@ -128,7 +128,7 @@ app.use('*', (req, res) => {
     });
 });
 
-const hostname = '127.0.0.1'; // or use '0.0.0.0' to allow external access
+const hostname = '0.0.0.0'; // or use '0.0.0.0' to allow external access
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, hostname, () => {
